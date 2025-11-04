@@ -14,7 +14,6 @@ class FileGenerator {
     const fileCount = getProblemsDirFileCount();
     const fileId = fileCount + 1;
     const filename = `${fileId}-${problem.englishName}.ts`;
-
     const filePath = createProblemFile(filename, problem.content);
     return filePath;
   }
@@ -29,8 +28,10 @@ class FileGenerator {
 
     const filePath = path.join(process.cwd(), "solutions", filename);
 
-    const aiResponse = await this.ai.createCompletion(solution_template);
     const testSummary = this.generateTestSummary(testResults);
+    const aiResponse = await this.ai.createCompletion(
+      solution_template(problemMeta, testSummary)
+    );
 
     const bashContent = `
       ${solution_base(solutionFn, examples, problemMeta, testSummary)}

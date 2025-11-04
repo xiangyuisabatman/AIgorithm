@@ -39,6 +39,7 @@ export interface UserProgress {
 }
 
 export interface PracticeSession {
+  sessionId?: string;
   problems: ProblemMeta[];
   startTime: Date;
   endTime?: Date;

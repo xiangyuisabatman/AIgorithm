@@ -92,7 +92,7 @@ class AlgorithmCLI {
 
     this.system.startPracticeSession(num);
   }
-
+  // 2. 提交现有题目解答
   private async submitExistingSolution() {
     const problemsDir = path.join(process.cwd(), "problems");
     if (!fs.existsSync(problemsDir)) {
@@ -167,6 +167,7 @@ class AlgorithmCLI {
     }
   }
 
+  // 2.1 处理现有题目解答
   private async processExistingSolution(
     solutionFn: Function,
     examples: Example[],
@@ -202,11 +203,11 @@ class AlgorithmCLI {
       failedTestCase.forEach((test, index) => {
         console.log("====================================");
         console.log(`失败用例：${JSON.stringify(test.failedTestCase)}`);
-        console.log("====================================");
         console.log(`   ${index + 1}. ${test.errorMessage}`);
+        console.log("====================================");
       });
 
-      this.system;
+      this.system.completeCurrentSession();
       return;
     }
   }

@@ -48,7 +48,6 @@ export function createProblemFile(filename: string, content: string) {
   }
 
   const filePath = path.join(problemsDir, filename);
-
   try {
     fs.writeFileSync(filePath, content, { encoding: "utf-8" });
     return filePath;

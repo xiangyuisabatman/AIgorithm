@@ -35,9 +35,14 @@ export const solution_base = (
   `;
 };
 
-export const solution_template = `
+export const solution_template = (
+  problemMeta: ProblemMeta,
+  testSummary: string
+) => `
   --- 
-  ## 题解（请帮助补全详细题解，包括多种方法的逐步思路）
+  ## ${
+    problemMeta.englishName
+  }题解（请帮助补全详细题解，包括多种方法的逐步思路）
 
   请分别给出至少两种解法（基础及进阶，各一种或多于两种），并分别说明每种解法的：
   - 基本解题思想
@@ -71,6 +76,9 @@ export const solution_template = `
   ### 可选·其它解法（如有）
 
   ---
+
+  ## 测试结果
+  ${testSummary}
 
   ## 学习建议（结合测试结果给出针对性建议）
 

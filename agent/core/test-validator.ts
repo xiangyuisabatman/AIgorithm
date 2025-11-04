@@ -42,9 +42,16 @@ class TestValidator {
     const input = example.input;
     const expected = example.output;
     const startTime = performance.now();
-    const result = this.solutionFn(input);
-    const passed = this.compareResults(result, expected);
     const executionTime = performance.now() - startTime;
+    let result: any;
+    if (Array.isArray(input)) {
+      result = await this.solutionFn(...input);
+    } else if (typeof input === "object") {
+      result = await this.solutionFn(...Object.values(input));
+    } else {
+      result = await this.solutionFn(input);
+    }
+    const passed = this.compareResults(result, expected);
     return {
       passed,
       failedTestCase: passed

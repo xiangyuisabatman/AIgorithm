@@ -1,6 +1,6 @@
 import { problem_template } from "../../prompt";
 import { AiServer } from "./ai";
-import type { UserProgress } from "./types";
+import type { PracticeSession, Problem, UserProgress } from "./types";
 
 class ProblemGenerator {
   private userProgress: UserProgress;
@@ -9,19 +9,19 @@ class ProblemGenerator {
     this.ai = new AiServer();
     this.userProgress = userProgress;
   }
-  async generatePracticeSession(num: number) {
+  async generatePracticeSession(num: number): Promise<PracticeSession> {
     const sessionId = this.generateSessionId();
     const problems = await this.selectProblems(num);
     return {
       sessionId,
-      problems,
+      problems: JSON.parse(problems),
       startTime: new Date(),
       completed: false,
       score: 0,
     };
   }
 
-  private async selectProblems(num: number) {
+  private async selectProblems(num: number): Promise<string> {
     const difficultyDistribution = this.calculateDifficultyDistribution();
     // 将难度分布信息插入prompt顶部
     const difficultyInfo = `请注意本次题目难度分布建议：Easy: ${(
@@ -34,7 +34,7 @@ class ProblemGenerator {
     const prompt = difficultyInfo + problem_template(num);
     const aiRes = await this.ai.createCompletion(prompt);
 
-    return aiRes.choices[0]?.message.content || [];
+    return aiRes.choices[0]?.message?.content || "";
   }
 
   // 计算难度分布
