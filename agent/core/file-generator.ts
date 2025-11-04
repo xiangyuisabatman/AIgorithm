@@ -4,6 +4,7 @@ import type { Example, Problem, ProblemMeta, TestResult } from "./types";
 import { createProblemFile, getProblemsDirFileCount } from "./utils";
 import { AiServer } from "./ai";
 import { solution_base, solution_template } from "../../prompt";
+import { PublicClass } from "./public";
 
 class FileGenerator {
   ai: AiServer;
@@ -28,7 +29,7 @@ class FileGenerator {
 
     const filePath = path.join(process.cwd(), "solutions", filename);
 
-    const testSummary = this.generateTestSummary(testResults);
+    const testSummary = PublicClass.generateTestSummary(testResults);
     const aiResponse = await this.ai.createCompletion(
       solution_template(problemMeta, testSummary)
     );
@@ -48,42 +49,6 @@ class FileGenerator {
     fs.writeFileSync(filePath, bashContent || "", "utf-8");
 
     return filePath;
-  }
-
-  private generateTestSummary(testResults: TestResult[]): string {
-    const total = testResults.length;
-    const passed = testResults.filter((r) => r.passed).length;
-    const failed = total - passed;
-    const successRate = total > 0 ? ((passed / total) * 100).toFixed(1) : "0";
-    const avgTime =
-      testResults.reduce((sum, r) => sum + r.executionTime, 0) / total;
-
-    return `
-- **总测试用例:** ${total}
-- **通过:** ${passed}
-- **失败:** ${failed}
-- **成功率:** ${successRate}%
-- **平均执行时间:** ${avgTime.toFixed(2)}ms
-
-${
-  failed > 0
-    ? `
-### 失败的测试用例
-${testResults
-  .filter((r) => !r.passed)
-  .map(
-    (result, index) => `
-**测试用例 ${index + 1}:**  
-- 输入: ${JSON.stringify(result.failedTestCase?.input)}
-- 期望: ${JSON.stringify(result.failedTestCase?.expected)}
-- 错误: ${result.errorMessage}
-`
-  )
-  .join("\n")}
-`
-    : ""
-}
-`;
   }
 }
 
