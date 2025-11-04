@@ -1,0 +1,221 @@
+import chalk from "chalk";
+import prompts from "prompts";
+import fs from "fs";
+import path from "path";
+import { AlgorithmSystem } from "./core/index.ts";
+import { getProblemFiles } from "./core/utils.ts";
+import { getGlobalOra } from "./core/global.ts";
+import type { Example, ProblemMeta } from "./core/types.ts";
+class AlgorithmCLI {
+  system!: AlgorithmSystem;
+  constructor() {
+    this.system = new AlgorithmSystem();
+    this.showWelcome();
+  }
+
+  private showWelcome() {
+    // 彩色的欢迎语, 使用chalk
+    const welcomeMessage =
+      chalk.cyan("欢迎使用") +
+      " " +
+      chalk.magenta("AlgorithmCLI") +
+      chalk.green("! 祝你编码愉快！");
+    console.log(welcomeMessage);
+    this.showMainMenu();
+  }
+
+  private async showMainMenu() {
+    console.log(chalk.yellow("\n主菜单:"));
+    const response = await prompts([
+      {
+        type: "select",
+        name: "value",
+        message: "请选择功能:",
+        choices: [
+          { title: "1. 🚀 开始新的练习", value: "1" },
+          { title: "2. 📝 提交现有题目解答", value: "2" },
+          // { title: "3. 📊 查看学习进度", value: "3" },
+          // { title: "4. 🎯 获取推荐题目", value: "4" },
+          // { title: "5. 📈 查看学习路径", value: "5" },
+          // { title: "6. 🔄 重置进度", value: "6" },
+          { title: "7. ❌ 退出系统", value: "7" },
+        ],
+      },
+    ]);
+    this.handleUserChoice(response.value);
+  }
+
+  private handleUserChoice(choice: string) {
+    switch (choice) {
+      case "1":
+        this.startPracticeSession();
+        break;
+      case "2":
+        this.submitExistingSolution();
+        break;
+      // case "3":
+      //   this.showProgress();
+      //   break;
+      // case "4":
+      //   this.showRecommendedProblems();
+      //   break;
+      // case "5":
+      //   this.showLearningPath();
+      //   break;
+      // case "6":
+      //   this.resetProgress();
+      //   break;
+      case "7":
+        this.exitSystem();
+        break;
+      default:
+        console.log("❌ 无效选择，请重新选择");
+        this.showMainMenu();
+    }
+  }
+
+  // 1.开始新的练习
+  private async startPracticeSession() {
+    const res = await prompts([
+      {
+        type: "number",
+        name: "value",
+        message: "请输入要练习的题目数量:",
+        initial: 1,
+        style: "default",
+        min: 1,
+        max: 3,
+      },
+    ]);
+
+    const num = res.value;
+
+    this.system.startPracticeSession(num);
+  }
+
+  private async submitExistingSolution() {
+    const problemsDir = path.join(process.cwd(), "problems");
+    if (!fs.existsSync(problemsDir)) {
+      {
+        console.log(chalk.red("❌ 没有找到题目文件目录"));
+        this.showMainMenu();
+        return;
+      }
+    }
+
+    const problemFiles = getProblemFiles();
+    if (problemFiles.length === 0) {
+      console.log(chalk.red("❌ 没有找到题目文件"));
+      this.showMainMenu();
+      return;
+    }
+    const res = await prompts([
+      {
+        type: "select",
+        name: "value",
+        message: "请选择要提交的题目:",
+        choices: problemFiles.map((file) => ({
+          title: file.filename,
+          value: file.filePath,
+        })),
+      },
+    ]);
+
+    const problemFile = fs.existsSync(res.value);
+    if (!problemFile) {
+      console.log(chalk.red("❌ 没有找到题目文件"));
+      this.showMainMenu();
+      return;
+    }
+
+    const oraInstance = getGlobalOra();
+    oraInstance.start("正在加载题目： ");
+
+    // 动态引入题目文件，提取其中导出的 solution 方法
+    let solutionFn, examples, problemMeta;
+    try {
+      const fileModule = await import(res.value);
+      if (typeof fileModule.solution !== "function" || !fileModule.solution) {
+        oraInstance.fail("❌ 未找到解答代码，请确保文件中导出 solution 函数");
+        this.showMainMenu();
+        return;
+      }
+      solutionFn = fileModule.solution;
+      examples = fileModule.examples;
+      problemMeta = fileModule.problemMeta;
+      oraInstance.succeed("题目加载成功，已提取 solution 方法");
+
+      const res2 = await prompts([
+        {
+          type: "confirm",
+          name: "value",
+          message: "是否使用此代码提交？(y/N):",
+          initial: true,
+        },
+      ]);
+
+      if (!res2.value) {
+        console.log("❌ 取消提交");
+        this.showMainMenu();
+      } else {
+        this.processExistingSolution(solutionFn, examples, problemMeta);
+      }
+    } catch (err) {
+      oraInstance.fail(`加载题目出错: ${err}`);
+      this.showMainMenu();
+      return;
+    }
+  }
+
+  private async processExistingSolution(
+    solutionFn: Function,
+    examples: Example[],
+    problemMeta: ProblemMeta
+  ) {
+    // 创建临时会话
+    const tempSession = {
+      sessionId: `temp_${Date.now()}`,
+      problems: [problemMeta],
+      startTime: new Date(),
+      completed: false,
+      score: 0,
+    };
+
+    this.system.setCurrentSession(tempSession);
+
+    const testResults = await this.system.submitSolution(
+      solutionFn,
+      examples,
+      problemMeta
+    );
+
+    // 检查是否通过
+    const passed = testResults.every((result) => result.passed);
+
+    if (passed) {
+      console.log(chalk.green("🎉 解答验证通过"));
+      return testResults;
+    } else {
+      console.log(chalk.red("❌ 解答验证未通过"));
+      const failedTestCase = testResults.filter((result) => !result.passed);
+      console.log(chalk.yellowBright("\n🔍 失败的测试用例:"));
+      failedTestCase.forEach((test, index) => {
+        console.log("====================================");
+        console.log(`失败用例：${JSON.stringify(test.failedTestCase)}`);
+        console.log("====================================");
+        console.log(`   ${index + 1}. ${test.errorMessage}`);
+      });
+
+      this.system;
+      return;
+    }
+  }
+
+  // 退出系统
+  private exitSystem(): void {
+    console.log("\n" + chalk.green("👋 感谢使用算法练习系统！"));
+    console.log(chalk.blue("📚 继续加油，算法学习需要持之以恒！"));
+  }
+}
+
+export { AlgorithmCLI };
