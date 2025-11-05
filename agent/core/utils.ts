@@ -75,3 +75,69 @@ export function getProblemsJson() {
     return [];
   }
 }
+
+export function removeAllProblemsDirFiles() {
+  const problemsDir = path.join(projectRoot, "problems");
+  if (!fs.existsSync(problemsDir)) {
+    return;
+  }
+
+  function removeDirContents(dirPath: string) {
+    const items = fs.readdirSync(dirPath);
+    for (const item of items) {
+      const itemPath = path.join(dirPath, item);
+      const stat = fs.statSync(itemPath);
+      if (stat.isDirectory()) {
+        removeDirContents(itemPath);
+        fs.rmdirSync(itemPath);
+      } else {
+        fs.unlinkSync(itemPath);
+      }
+    }
+  }
+
+  try {
+    removeDirContents(problemsDir);
+    GlobalConsole.success('\n 已删除 "problems" 目录下所有文件和文件夹');
+  } catch (err) {
+    GlobalConsole.error('删除 "problems" 目录内容失败: ' + err);
+  }
+}
+
+export function removeAllSolutionsDirFiles() {
+  const solutionsDir = path.join(projectRoot, "solutions");
+  if (!fs.existsSync(solutionsDir)) {
+    return;
+  }
+
+  function removeDirContents(dirPath: string) {
+    const items = fs.readdirSync(dirPath);
+    for (const item of items) {
+      const itemPath = path.join(dirPath, item);
+      const stat = fs.statSync(itemPath);
+      if (stat.isDirectory()) {
+        removeDirContents(itemPath);
+        fs.rmdirSync(itemPath);
+      } else {
+        fs.unlinkSync(itemPath);
+      }
+    }
+  }
+
+  try {
+    removeDirContents(solutionsDir);
+    GlobalConsole.success('已删除 "solutions" 目录下所有文件和文件夹');
+  } catch (err) {
+    GlobalConsole.error('删除 "solutions" 目录内容失败: ' + err);
+  }
+}
+
+export function clearProblemsJson() {
+  const problemsJsonPath = path.join(projectRoot, "problems.json");
+  try {
+    fs.writeFileSync(problemsJsonPath, "[]", "utf-8");
+    GlobalConsole.success('已清空根目录下 "problems.json" 的内容');
+  } catch (err) {
+    GlobalConsole.error('清空 "problems.json" 内容失败: ' + err);
+  }
+}

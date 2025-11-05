@@ -54,7 +54,7 @@ export const solution_template = (
 
   - 空间复杂度：
 
-  - 代码实现：
+  - 代码实现(javascript)：
 
   ---
 
@@ -67,11 +67,11 @@ export const solution_template = (
 
   - 空间复杂度：
 
-  - 代码实现：
+  - 代码实现(javascript)：
 
   ---
 
-  ### 可选·其它解法（如有）
+  ### 可选·其它解法（如有）(javascript)
 
   ---
 

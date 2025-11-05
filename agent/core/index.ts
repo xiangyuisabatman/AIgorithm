@@ -97,6 +97,10 @@ class AlgorithmSystem {
   setCurrentSession(currentSession: PracticeSession | null) {
     this.currentSession = currentSession;
   }
+
+  resetProgress() {
+    this.progressTracker.resetProgress();
+  }
 }
 
 export { AlgorithmSystem };

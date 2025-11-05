@@ -30,7 +30,7 @@ class AlgorithmCLI {
           // { title: "3. 📊 查看学习进度", value: "3" },
           // { title: "4. 🎯 获取推荐题目", value: "4" },
           // { title: "5. 📈 查看学习路径", value: "5" },
-          // { title: "6. 🔄 重置进度", value: "6" },
+          { title: "6. 🔄 重置进度", value: "6" },
           { title: "7. ❌ 退出系统", value: "7" },
         ],
       },
@@ -55,9 +55,9 @@ class AlgorithmCLI {
       // case "5":
       //   this.showLearningPath();
       //   break;
-      // case "6":
-      //   this.resetProgress();
-      //   break;
+      case "6":
+        this.resetProgress();
+        break;
       case "7":
         this.exitSystem();
         break;
@@ -202,6 +202,27 @@ class AlgorithmCLI {
       });
     }
     this.system.completeCurrentSession();
+  }
+
+  private async resetProgress() {
+    const res = await prompts([
+      {
+        type: "confirm",
+        name: "value",
+        message:
+          "是否确定要重置进度？这将删除所有练习记录和分析报告及所有题目文件(y/N):",
+        initial: false,
+      },
+    ]);
+
+    if (res.value) {
+      const oraInstance = getGlobalOra();
+      oraInstance.start("正在重置进度...");
+      this.system.resetProgress();
+      oraInstance.succeed("进度重置成功");
+    } else {
+      this.showMainMenu();
+    }
   }
 
   // 退出系统

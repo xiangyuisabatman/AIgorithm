@@ -3,6 +3,11 @@ import path from "path";
 import { ProblemGenerator } from "./problem-generator";
 import type { PracticeSession, ProblemMeta, UserProgress } from "./types";
 import { GlobalConsole } from "./console";
+import {
+  clearProblemsJson,
+  removeAllProblemsDirFiles,
+  removeAllSolutionsDirFiles,
+} from "./utils";
 
 class ProgressTracker {
   private problem_generator: ProblemGenerator;
@@ -97,6 +102,16 @@ class ProgressTracker {
   // 获取用户进度
   getUserProgress(): UserProgress {
     return { ...this.userProgress };
+  }
+
+  resetProgress() {
+    this.practiceHistory = [];
+    this.userProgress = this.initializeCompletedProgress();
+    this.saveProgress();
+    removeAllProblemsDirFiles();
+    removeAllSolutionsDirFiles();
+    clearProblemsJson();
+    GlobalConsole.info("已重置进度。");
   }
 }
 
