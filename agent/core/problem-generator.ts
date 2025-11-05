@@ -1,5 +1,6 @@
 import { problem_template } from "../../prompt";
 import { AiServer } from "./ai";
+import { getGlobalOra } from "./global";
 import type { PracticeSession, Problem, UserProgress } from "./types";
 
 class ProblemGenerator {
@@ -10,8 +11,12 @@ class ProblemGenerator {
     this.userProgress = userProgress;
   }
   async generatePracticeSession(num: number): Promise<PracticeSession> {
+    const oraInstance = getGlobalOra();
+    oraInstance.start("题目生成中...");
     const sessionId = this.generateSessionId();
     const problems = await this.selectProblems(num);
+    oraInstance.succeed("题目生成成功");
+
     return {
       sessionId,
       problems: JSON.parse(problems),

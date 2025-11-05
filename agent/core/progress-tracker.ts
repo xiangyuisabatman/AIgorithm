@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { ProblemGenerator } from "./problem-generator";
 import type { PracticeSession, ProblemMeta, UserProgress } from "./types";
+import { GlobalConsole } from "./console";
 
 class ProgressTracker {
   private problem_generator: ProblemGenerator;
@@ -37,8 +38,8 @@ class ProgressTracker {
 
       this.updateAccuracyAfterProblemCompletion(passed);
 
-      console.log(
-        `✅ 题目 ${problemMeta.englishName} 已完成！当前已解决 ${this.userProgress.totalSolved} 道题目`
+      GlobalConsole.success(
+        `题目 ${problemMeta.englishName} 已完成！当前已解决 ${this.userProgress.totalSolved} 道题目`
       );
     }
   }
@@ -56,7 +57,9 @@ class ProgressTracker {
       const data = fs.readFileSync(filePath, "utf8");
       const progressData = JSON.parse(data);
       this.userProgress = progressData.userProgress;
-      console.log("已加载进度：", this.userProgress);
+      GlobalConsole.info(
+        "已加载做题进度：" + JSON.stringify(this.userProgress)
+      );
       this.practiceHistory = progressData.practiceHistory.map(
         (session: any) => ({
           ...session,
@@ -66,7 +69,7 @@ class ProgressTracker {
       );
       return true;
     } else {
-      console.log("未找到进度文件，将使用默认进度。");
+      GlobalConsole.warn("未找到进度文件，将使用默认进度。");
       return false;
     }
   }
@@ -87,7 +90,7 @@ class ProgressTracker {
         "utf-8"
       );
     } catch (error) {
-      console.error("Failed to save progress:", error);
+      GlobalConsole.error("Failed to save progress:" + error);
     }
   }
 

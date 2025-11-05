@@ -6,26 +6,20 @@ import { AlgorithmSystem } from "./core/index.ts";
 import { getProblemFiles } from "./core/utils.ts";
 import { getGlobalOra } from "./core/global.ts";
 import type { Example, ProblemMeta } from "./core/types.ts";
+import { GlobalConsole } from "./core/console.ts";
 class AlgorithmCLI {
   system!: AlgorithmSystem;
   constructor() {
-    this.system = new AlgorithmSystem();
     this.showWelcome();
-  }
-
-  private showWelcome() {
-    // 彩色的欢迎语, 使用chalk
-    const welcomeMessage =
-      chalk.cyan("欢迎使用") +
-      " " +
-      chalk.magenta("AlgorithmCLI") +
-      chalk.green("! 祝你编码愉快！");
-    console.log(welcomeMessage);
+    this.system = new AlgorithmSystem();
     this.showMainMenu();
   }
 
+  private showWelcome() {
+    GlobalConsole.info("欢迎使用 AIgorithm");
+  }
+
   private async showMainMenu() {
-    console.log(chalk.yellow("\n主菜单:"));
     const response = await prompts([
       {
         type: "select",
@@ -69,7 +63,7 @@ class AlgorithmCLI {
         this.exitSystem();
         break;
       default:
-        console.log("❌ 无效选择，请重新选择");
+        GlobalConsole.error("无效选择，请重新选择");
         this.showMainMenu();
     }
   }
@@ -97,7 +91,7 @@ class AlgorithmCLI {
     const problemsDir = path.join(process.cwd(), "problems");
     if (!fs.existsSync(problemsDir)) {
       {
-        console.log(chalk.red("❌ 没有找到题目文件目录"));
+        GlobalConsole.error("没有找到题目文件目录/problems");
         this.showMainMenu();
         return;
       }
@@ -105,7 +99,7 @@ class AlgorithmCLI {
 
     const problemFiles = getProblemFiles();
     if (problemFiles.length === 0) {
-      console.log(chalk.red("❌ 没有找到题目文件"));
+      GlobalConsole.error("没有找到题目文件");
       this.showMainMenu();
       return;
     }
@@ -123,7 +117,7 @@ class AlgorithmCLI {
 
     const problemFile = fs.existsSync(res.value);
     if (!problemFile) {
-      console.log(chalk.red("❌ 没有找到题目文件"));
+      GlobalConsole.error("没有找到题目文件");
       this.showMainMenu();
       return;
     }
@@ -136,14 +130,16 @@ class AlgorithmCLI {
     try {
       const fileModule = await import(res.value);
       if (typeof fileModule.solution !== "function" || !fileModule.solution) {
-        oraInstance.fail("❌ 未找到解答代码，请确保文件中导出 solution 函数");
+        oraInstance.fail();
+        GlobalConsole.error("未找到解答代码，请确保文件中导出 solution 函数");
         this.showMainMenu();
         return;
       }
       solutionFn = fileModule.solution;
       examples = fileModule.examples;
       problemMeta = fileModule.problemMeta;
-      oraInstance.succeed("题目加载成功，已提取 solution 方法");
+      oraInstance.succeed();
+      GlobalConsole.success("题目加载成功，已提取 solution 方法");
 
       const res2 = await prompts([
         {
@@ -155,7 +151,7 @@ class AlgorithmCLI {
       ]);
 
       if (!res2.value) {
-        console.log("❌ 取消提交");
+        GlobalConsole.error("取消提交");
         this.showMainMenu();
       } else {
         this.processExistingSolution(solutionFn, examples, problemMeta);
@@ -194,19 +190,18 @@ class AlgorithmCLI {
     const passed = testResults.every((result) => result.passed);
 
     if (passed) {
-      console.log(chalk.green("🎉 解答验证通过"));
+      GlobalConsole.success("解答验证通过");
       return testResults;
     } else {
-      console.log(chalk.red("❌ 解答验证未通过"));
+      GlobalConsole.error("解答验证未通过");
       const failedTestCase = testResults.filter((result) => !result.passed);
-      console.log(chalk.yellowBright("\n🔍 失败的测试用例:"));
+      GlobalConsole.info("失败的测试用例:");
       failedTestCase.forEach((test, index) => {
-        console.log("====================================");
-        console.log(`失败用例：${JSON.stringify(test.failedTestCase)}`);
-        console.log(`   ${index + 1}. ${test.errorMessage}`);
-        console.log("====================================");
+        GlobalConsole.warn("====================================");
+        GlobalConsole.error(`失败用例：${JSON.stringify(test.failedTestCase)}`);
+        GlobalConsole.info(`   ${index + 1}. ${test.errorMessage}`);
+        GlobalConsole.warn("====================================");
       });
-
       this.system.completeCurrentSession();
       return;
     }
@@ -214,8 +209,8 @@ class AlgorithmCLI {
 
   // 退出系统
   private exitSystem(): void {
-    console.log("\n" + chalk.green("👋 感谢使用算法练习系统！"));
-    console.log(chalk.blue("📚 继续加油，算法学习需要持之以恒！"));
+    GlobalConsole.success("👋 感谢使用算法练习系统！");
+    GlobalConsole.info("📚 继续加油，算法学习需要持之以恒！");
   }
 }
 

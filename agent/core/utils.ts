@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { GlobalConsole } from "./console";
 
 // 获取项目根目录
 const projectRoot = process.cwd();
@@ -20,7 +21,7 @@ export function getProblemsDirFileCount() {
 
     return fileCount;
   } catch (err) {
-    console.error("Error reading directory:", err);
+    GlobalConsole.error("Error reading directory:" + err);
     return 0;
   }
 }
@@ -52,7 +53,7 @@ export function createProblemFile(filename: string, content: string) {
     fs.writeFileSync(filePath, content, { encoding: "utf-8" });
     return filePath;
   } catch (err) {
-    console.error("Error creating problem file:", err);
+    GlobalConsole.error("Error creating problem file:" + err);
     return false;
   }
 }

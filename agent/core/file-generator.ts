@@ -5,6 +5,8 @@ import { createProblemFile, getProblemsDirFileCount } from "./utils";
 import { AiServer } from "./ai";
 import { solution_base, solution_template } from "../../prompt";
 import { PublicClass } from "./public";
+import { GlobalConsole } from "./console";
+import { getGlobalOra } from "./global";
 
 class FileGenerator {
   ai: AiServer;
@@ -12,10 +14,19 @@ class FileGenerator {
     this.ai = new AiServer();
   }
   generateProblemFile(problem: Problem) {
+    const oraInstance = getGlobalOra();
+    oraInstance.start("题目文件创建中...");
     const fileCount = getProblemsDirFileCount();
     const fileId = fileCount + 1;
     const filename = `${fileId}-${problem.englishName}.ts`;
     const filePath = createProblemFile(filename, problem.content);
+    oraInstance.stop();
+    if (!filePath) {
+      GlobalConsole.error(`${problem.englishName}题目文件创建失败`);
+    } else {
+      GlobalConsole.success(`题目文件已生成: ${filePath}`);
+    }
+
     return filePath;
   }
 
@@ -30,6 +41,7 @@ class FileGenerator {
     const filePath = path.join(process.cwd(), "solutions", filename);
 
     const testSummary = PublicClass.generateTestSummary(testResults);
+    GlobalConsole.info("正在生成 AI 总结内容...");
     const aiResponse = await this.ai.createCompletion(
       solution_template(problemMeta, testSummary)
     );
@@ -43,10 +55,12 @@ class FileGenerator {
     const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
+      GlobalConsole.info(`创建目录: ${dir}`);
     }
 
     // 如果文件已存在，直接覆盖文件内容
     fs.writeFileSync(filePath, bashContent || "", "utf-8");
+    GlobalConsole.success(`解答总结文件已生成: ${filePath}`);
 
     return filePath;
   }
