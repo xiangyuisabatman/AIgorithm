@@ -1,4 +1,3 @@
-import chalk from "chalk";
 import prompts from "prompts";
 import fs from "fs";
 import path from "path";
@@ -191,7 +190,6 @@ class AlgorithmCLI {
 
     if (passed) {
       GlobalConsole.success("解答验证通过");
-      return testResults;
     } else {
       GlobalConsole.error("解答验证未通过");
       const failedTestCase = testResults.filter((result) => !result.passed);
@@ -202,9 +200,8 @@ class AlgorithmCLI {
         GlobalConsole.info(`   ${index + 1}. ${test.errorMessage}`);
         GlobalConsole.warn("====================================");
       });
-      this.system.completeCurrentSession();
-      return;
     }
+    this.system.completeCurrentSession();
   }
 
   // 退出系统

@@ -1,14 +1,17 @@
 import { problem_template } from "../../prompt";
 import { AiServer } from "./ai";
+import { FileGenerator } from "./file-generator";
 import { getGlobalOra } from "./global";
-import type { PracticeSession, Problem, UserProgress } from "./types";
+import type { PracticeSession, UserProgress } from "./types";
 
 class ProblemGenerator {
   private userProgress: UserProgress;
+  private fileGenerator: FileGenerator;
   ai: AiServer;
   constructor(userProgress: UserProgress) {
     this.ai = new AiServer();
     this.userProgress = userProgress;
+    this.fileGenerator = new FileGenerator();
   }
   async generatePracticeSession(num: number): Promise<PracticeSession> {
     const oraInstance = getGlobalOra();
@@ -16,10 +19,11 @@ class ProblemGenerator {
     const sessionId = this.generateSessionId();
     const problems = await this.selectProblems(num);
     oraInstance.succeed("题目生成成功");
-
+    const json = JSON.parse(problems);
+    this.fileGenerator.appendProblemToProblemsJson(json);
     return {
       sessionId,
-      problems: JSON.parse(problems),
+      problems: json,
       startTime: new Date(),
       completed: false,
       score: 0,
@@ -51,22 +55,49 @@ class ProblemGenerator {
     const totalSolved = this.userProgress.totalSolved;
     const accuracy = this.userProgress.accuracy;
 
+    // --- 基础阶段定义 ---
     if (totalSolved < 5) {
-      // 初学者：主要Easy题目
-      return { Easy: 0.7, Medium: 0.3, Hard: 0.0 };
-    } else if (totalSolved < 20) {
-      // 初级：Easy + Medium
-      return { Easy: 0.5, Medium: 0.5, Hard: 0.0 };
-    } else if (accuracy > 0.8) {
-      // 高准确率：增加Hard题目
-      return { Easy: 0.2, Medium: 0.5, Hard: 0.3 };
-    } else if (accuracy > 0.6) {
-      // 中等准确率：平衡分布
-      return { Easy: 0.3, Medium: 0.6, Hard: 0.1 };
-    } else {
-      // 低准确率：降低难度
-      return { Easy: 0.6, Medium: 0.4, Hard: 0.0 };
+      // 新手阶段：以简单题为主
+      return { Easy: 0.8, Medium: 0.2, Hard: 0.0 };
     }
+
+    // --- 成长阶段 ---
+    if (totalSolved < 20) {
+      // 根据准确率微调难度分布
+      if (accuracy >= 0.8) {
+        return { Easy: 0.3, Medium: 0.6, Hard: 0.1 };
+      } else if (accuracy >= 0.6) {
+        return { Easy: 0.5, Medium: 0.5, Hard: 0.0 };
+      } else {
+        return { Easy: 0.7, Medium: 0.3, Hard: 0.0 };
+      }
+    }
+
+    // --- 熟练阶段 ---
+    if (totalSolved < 50) {
+      if (accuracy >= 0.85) {
+        return { Easy: 0.2, Medium: 0.55, Hard: 0.25 };
+      } else if (accuracy >= 0.7) {
+        return { Easy: 0.3, Medium: 0.55, Hard: 0.15 };
+      } else {
+        return { Easy: 0.5, Medium: 0.45, Hard: 0.05 };
+      }
+    }
+
+    // --- 高级阶段 ---
+    if (totalSolved < 100) {
+      if (accuracy >= 0.85) {
+        return { Easy: 0.15, Medium: 0.5, Hard: 0.35 };
+      } else if (accuracy >= 0.7) {
+        return { Easy: 0.25, Medium: 0.55, Hard: 0.2 };
+      } else {
+        return { Easy: 0.4, Medium: 0.5, Hard: 0.1 };
+      }
+    }
+
+    // --- 专家阶段 ---
+    // 做题量大，始终保持一定比例的 Hard 题
+    return { Easy: 0.1, Medium: 0.5, Hard: 0.4 };
   }
 
   // 生成会话ID

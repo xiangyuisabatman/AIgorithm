@@ -5,8 +5,7 @@ export const solution_base = (
   examples: Example[],
   problemMeta: ProblemMeta,
   testSummary: string
-) => {
-  `
+) => `
   # 解题报告：${problemMeta.englishName}
 
   ## 题目描述
@@ -33,7 +32,6 @@ export const solution_base = (
   ## 测试结果
   ${testSummary}
   `;
-};
 
 export const solution_template = (
   problemMeta: ProblemMeta,
@@ -164,6 +162,7 @@ export const problem_template = (num: number) => `
   2. examples 中的 input/output 字段直接写为可正确 JSON 解析的原始数据（如 input:[[0,0],[2,2]]，output:20），不可用字符串形式（不要带引号），务必与实际类型完全一致。
   3. 只输出 JSON 数组，不要任何其他内容。
   4. 确保 5 个 examples 覆盖边界和极限情况（如空数组、单元素、最大输入规模、全相同元素、无解情况等）。
+  5. 生成算法前，先验证要提供的算法题提供的用例，input和output是否正确（不要output错误，不要input错误），请确保生成的题目的输入输出格式正确，且与实际题目一致。
 
   现在请生成 ${num} 道题。
 `;

@@ -41,7 +41,6 @@ class FileGenerator {
     const filePath = path.join(process.cwd(), "solutions", filename);
 
     const testSummary = PublicClass.generateTestSummary(testResults);
-    GlobalConsole.info("正在生成 AI 总结内容...");
     const aiResponse = await this.ai.createCompletion(
       solution_template(problemMeta, testSummary)
     );
@@ -63,6 +62,47 @@ class FileGenerator {
     GlobalConsole.success(`解答总结文件已生成: ${filePath}`);
 
     return filePath;
+  }
+
+  /**
+   * 记录生成的题目信息到根目录的 problems.json 文件
+   * 会追加保存生成的题目的元信息（不包含解答，仅元数据）
+   */
+  appendProblemToProblemsJson(problems: ProblemMeta[]) {
+    const problemsJsonPath = path.join(process.cwd(), "problems.json");
+
+    let problemsArr = [];
+    // 若文件存在，读取原内容
+    if (fs.existsSync(problemsJsonPath)) {
+      try {
+        const fileContent = fs.readFileSync(problemsJsonPath, "utf-8");
+        problemsArr = JSON.parse(fileContent);
+        if (!Array.isArray(problemsArr)) {
+          problemsArr = [];
+        }
+      } catch (error) {
+        GlobalConsole.warn("problems.json 解析错误，重新新建: " + error);
+        problemsArr = [];
+      }
+    }
+    // 提取元信息（englishName, description, difficulty, examples）
+    problems.forEach((problem) => {
+      const { englishName, difficulty } = problem;
+      problemsArr.push({
+        englishName,
+        difficulty,
+        createdAt: new Date().toLocaleString(),
+      });
+    });
+    try {
+      fs.writeFileSync(
+        problemsJsonPath,
+        JSON.stringify(problemsArr, null, 2),
+        "utf-8"
+      );
+    } catch (error) {
+      GlobalConsole.error("写入 problems.json 失败: " + error);
+    }
   }
 }
 

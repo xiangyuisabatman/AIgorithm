@@ -4,7 +4,6 @@ import { getGlobalOra } from "./global";
 import { ProgressTracker } from "./progress-tracker";
 import type { Example, PracticeSession, Problem, ProblemMeta } from "./types";
 import { TestValidator } from "./test-validator";
-import { GlobalConsole } from "./console";
 
 class AlgorithmSystem {
   private progressTracker: ProgressTracker;
@@ -53,20 +52,19 @@ class AlgorithmSystem {
         type: "confirm",
         name: "value",
         message: "是否创建解题报告?",
-        initial: true,
+        initial: false,
       },
     ]);
 
     if (res.value) {
       oraInstance.start("解题报告文件创建中...");
-      const solutionFilePath = await this.fileGenerator.generateSolutionFile(
+      await this.fileGenerator.generateSolutionFile(
         solutionFn,
         examples,
         problemMeta,
         testResults
       );
       oraInstance.stop();
-      GlobalConsole.success(`文件已创建: ${solutionFilePath}`);
     }
 
     const passed = testResults.every((result) => result.passed);
@@ -76,6 +74,7 @@ class AlgorithmSystem {
   }
 
   completeCurrentSession() {
+    console.log("[ this.currentSession ] >", this.currentSession);
     if (!this.currentSession) {
       throw new Error("没有活跃的练习会话");
     }
