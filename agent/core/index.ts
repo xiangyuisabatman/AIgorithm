@@ -51,7 +51,7 @@ class AlgorithmSystem {
       {
         type: "confirm",
         name: "value",
-        message: "是否创建解题报告?",
+        message: "是否创建解题报告?（默认不创建）",
         initial: false,
       },
     ]);

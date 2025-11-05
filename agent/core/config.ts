@@ -6,7 +6,7 @@ class AlgorithmConFig {
 
     if (!OPENAI_API_KEY) {
       GlobalConsole.error(
-        "API key is missing. Please add it to the .env file."
+        "AI API key 不存在，请执行 bun run init 进行初始化！"
       );
       process.exit(1);
     }

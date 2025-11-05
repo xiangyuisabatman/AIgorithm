@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { TestValidator } from "./core/test-validator";
-import { PublicClass } from "./core/public";
-import { GlobalConsole } from "./core/console";
+import { TestValidator } from "../core/test-validator";
+import { PublicClass } from "../core/public";
+import { GlobalConsole } from "../core/console";
 /**
  * 运行验证
  * @param filename 算法文件名

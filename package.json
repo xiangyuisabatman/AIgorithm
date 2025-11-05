@@ -4,7 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "valid": "bun run agent/command.ts"
+    "init": "bun run agent/command/init.ts",
+    "valid": "bun run agent/command/valid.ts",
+    "start": "bun run index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -30,8 +30,8 @@ class AlgorithmCLI {
           // { title: "3. 📊 查看学习进度", value: "3" },
           // { title: "4. 🎯 获取推荐题目", value: "4" },
           // { title: "5. 📈 查看学习路径", value: "5" },
-          { title: "6. 🔄 重置进度", value: "6" },
-          { title: "7. ❌ 退出系统", value: "7" },
+          { title: "3. 🔄 重置进度", value: "6" },
+          { title: "4. ❌ 退出系统", value: "7" },
         ],
       },
     ]);
@@ -227,8 +227,8 @@ class AlgorithmCLI {
 
   // 退出系统
   private exitSystem(): void {
-    GlobalConsole.success("👋 感谢使用算法练习系统！");
-    GlobalConsole.info("📚 继续加油，算法学习需要持之以恒！");
+    GlobalConsole.success("感谢使用算法练习系统！");
+    GlobalConsole.info("继续加油，算法学习需要持之以恒！");
   }
 }
 

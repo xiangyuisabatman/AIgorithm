@@ -66,7 +66,7 @@ export function getProblemsJson() {
     return [];
   }
   try {
-    const fileContent = fs.readFileSync(problemsJsonPath, "utf-8");
+    const fileContent = fs.readFileSync(problemsJsonPath, "utf-8") || "[]";
     return JSON.parse(fileContent).map(
       (problem: ProblemMeta) => problem.englishName
     );

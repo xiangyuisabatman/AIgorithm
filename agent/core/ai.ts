@@ -10,9 +10,6 @@ class AiServer {
     // 如果 aiInstance 没有被创建过，就创建它
     if (!AiServer.aiInstance) {
       const key = AlgorithmConFig.openai;
-      if (!key) {
-        throw new Error("API key is not provided.");
-      }
       AiServer.aiInstance = new OpenAI({
         apiKey: key,
         baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",

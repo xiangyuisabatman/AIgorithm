@@ -81,7 +81,6 @@ class FileGenerator {
           problemsArr = [];
         }
       } catch (error) {
-        GlobalConsole.warn("problems.json 解析错误，重新新建: " + error);
         problemsArr = [];
       }
     }
