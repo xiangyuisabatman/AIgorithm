@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { GlobalConsole } from "./console";
+import type { ProblemMeta } from "./types";
 
 // 获取项目根目录
 const projectRoot = process.cwd();
@@ -55,5 +56,22 @@ export function createProblemFile(filename: string, content: string) {
   } catch (err) {
     GlobalConsole.error("Error creating problem file:" + err);
     return false;
+  }
+}
+
+export function getProblemsJson() {
+  const problemsJsonPath = path.join(projectRoot, "problems.json");
+  if (!fs.existsSync(problemsJsonPath)) {
+    GlobalConsole.warn("problems.json 不存在");
+    return [];
+  }
+  try {
+    const fileContent = fs.readFileSync(problemsJsonPath, "utf-8");
+    return JSON.parse(fileContent).map(
+      (problem: ProblemMeta) => problem.englishName
+    );
+  } catch (err) {
+    GlobalConsole.error("读取 problems.json 失败: " + err);
+    return [];
   }
 }

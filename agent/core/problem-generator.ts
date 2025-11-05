@@ -3,6 +3,7 @@ import { AiServer } from "./ai";
 import { FileGenerator } from "./file-generator";
 import { getGlobalOra } from "./global";
 import type { PracticeSession, UserProgress } from "./types";
+import { getProblemsJson } from "./utils";
 
 class ProblemGenerator {
   private userProgress: UserProgress;
@@ -40,7 +41,18 @@ class ProblemGenerator {
     )}%，Hard: ${(difficultyDistribution.Hard * 100).toFixed(
       0
     )}%。请尽量按此分布比例出题。\n\n`;
-    const prompt = difficultyInfo + problem_template(num);
+
+    let usedProblemNames: string[] = getProblemsJson();
+    // 构造避免重复出题的前置信息
+    let avoidRepeatPrompt = "";
+    if (usedProblemNames.length > 0) {
+      avoidRepeatPrompt =
+        "请确保本次生成的所有题目不能与下列题目重复（根据英文题目名unique）：[" +
+        usedProblemNames.join(", ") +
+        "]\n\n";
+    }
+
+    const prompt = difficultyInfo + avoidRepeatPrompt + problem_template(num);
     const aiRes = await this.ai.createCompletion(prompt);
 
     return aiRes.choices[0]?.message?.content || "";
