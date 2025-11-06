@@ -6,31 +6,31 @@ export const solution_base = (
   problemMeta: ProblemMeta,
   testSummary: string
 ) => `
-  # 解题报告：${problemMeta.englishName}
+# 解题报告：${problemMeta.englishName}
 
-  ## 题目描述
-  ${problemMeta.description}
+## 题目描述
+${problemMeta.description}
 
-  ## 难度
-  ${problemMeta.difficulty}
+## 难度
+${problemMeta.difficulty}
 
-  ## 题解代码
-  ### 用例
-  ${examples
-    .map(
-      (example) =>
-        `- 输入: ${JSON.stringify(example.input)}\n- 期望: ${JSON.stringify(
-          example.output
-        )}`
-    )
-    .join("\n")}
+## 题解代码
+### 用例
+${examples
+  .map(
+    (example) =>
+      `- 输入: ${JSON.stringify(example.input)}\n- 期望: ${JSON.stringify(
+        example.output
+      )}`
+  )
+  .join("\n")}
 
-  \`\`\`javascript
-  ${solutionFn}
-  \`\`\`
+\`\`\`javascript
+${solutionFn}
+\`\`\`
 
-  ## 测试结果
-  ${testSummary}
+## 测试结果
+${testSummary}
   `;
 
 export const solution_template = (

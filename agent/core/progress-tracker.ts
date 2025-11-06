@@ -41,12 +41,15 @@ class ProgressTracker {
       this.userProgress.completedProblems.push(problemMeta.englishName);
       this.userProgress.totalSolved++;
 
-      this.updateAccuracyAfterProblemCompletion(passed);
-
       GlobalConsole.success(
         `题目 ${problemMeta.englishName} 已完成！当前已解决 ${this.userProgress.totalSolved} 道题目`
       );
     }
+    this.updateAccuracyAfterProblemCompletion(passed);
+  }
+
+  recordPracticeSession(session: PracticeSession) {
+    this.practiceHistory.push(session);
   }
 
   private updateAccuracyAfterProblemCompletion(passed: boolean) {

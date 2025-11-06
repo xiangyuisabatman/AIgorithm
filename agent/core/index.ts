@@ -74,7 +74,6 @@ class AlgorithmSystem {
   }
 
   completeCurrentSession() {
-    console.log("[ this.currentSession ] >", this.currentSession);
     if (!this.currentSession) {
       throw new Error("没有活跃的练习会话");
     }
@@ -90,6 +89,8 @@ class AlgorithmSystem {
 
     this.currentSession.score =
       (solvedCount / this.currentSession.problems.length) * 100;
+
+    this.progressTracker.recordPracticeSession(this.currentSession);
 
     this.progressTracker.saveProgress();
   }

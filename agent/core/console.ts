@@ -2,7 +2,7 @@ import chalk from "chalk";
 
 class GlobalConsole {
   static success(message: string) {
-    console.log(chalk.green(`🎉  ${message}`));
+    console.log(chalk.green(`🎉 ${message}`));
   }
 
   static error(message: string) {
@@ -10,11 +10,11 @@ class GlobalConsole {
   }
 
   static warn(message: string) {
-    console.log(chalk.yellow(`⚠️  ${message}`));
+    console.log(chalk.yellow(`⚠️ ${message}`));
   }
 
   static info(message: string) {
-    console.log(chalk.blue(`ℹ️  ${message}`));
+    console.log(chalk.blue(`ℹ️ ${message}`));
   }
 
   static processing(message: string) {
