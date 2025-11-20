@@ -103,6 +103,35 @@ class FileGenerator {
       GlobalConsole.error("写入 problems.json 失败: " + error);
     }
   }
+
+  /**
+   * 保存错误日志。将json字符串内容写入根目录 errors/ 下的唯一文件。
+   * @param jsonString 错误内容的json字符串
+   * @returns 文件保存路径
+   */
+  saveErrorLog(jsonString: string): string {
+    const errorsDir = path.join(process.cwd(), "errors");
+    // 创建errors目录（如不存在）
+    if (!fs.existsSync(errorsDir)) {
+      fs.mkdirSync(errorsDir, { recursive: true });
+    }
+    // 文件名加时间戳保证唯一性
+    const fileName =
+      "error_" +
+      new Date().toISOString().replace(/[:.]/g, "-") +
+      "_" +
+      Math.floor(Math.random() * 10000) +
+      ".json";
+    const filePath = path.join(errorsDir, fileName);
+
+    try {
+      fs.writeFileSync(filePath, jsonString, "utf-8");
+      GlobalConsole.success(`错误日志已保存: ${filePath}`);
+    } catch (error) {
+      GlobalConsole.error("写入错误日志失败: " + error);
+    }
+    return filePath;
+  }
 }
 
 export { FileGenerator };

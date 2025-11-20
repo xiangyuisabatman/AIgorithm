@@ -18,17 +18,32 @@ class ProblemGenerator {
     const oraInstance = getGlobalOra();
     oraInstance.start("题目生成中...");
     const sessionId = this.generateSessionId();
-    const problems = await this.selectProblems(num);
-    oraInstance.succeed("题目生成成功");
-    const json = JSON.parse(problems);
-    this.fileGenerator.appendProblemToProblemsJson(json);
-    return {
-      sessionId,
-      problems: json,
-      startTime: new Date(),
-      completed: false,
-      score: 0,
-    };
+    let problems: string = "";
+    let json: any = null;
+    try {
+      problems = await this.selectProblems(num);
+      json = JSON.parse(problems);
+      oraInstance.succeed("题目生成成功");
+      this.fileGenerator.appendProblemToProblemsJson(json);
+      return {
+        sessionId,
+        problems: json,
+        startTime: new Date(),
+        completed: false,
+        score: 0,
+      };
+    } catch (err: any) {
+      await this.fileGenerator.saveErrorLog(json);
+      oraInstance.fail("题目生成失败: " + (err?.message || err));
+      // 提示并返回空结果，也可根据需求抛出异常
+      return {
+        sessionId,
+        problems: [],
+        startTime: new Date(),
+        completed: false,
+        score: 0,
+      };
+    }
   }
 
   private async selectProblems(num: number): Promise<string> {

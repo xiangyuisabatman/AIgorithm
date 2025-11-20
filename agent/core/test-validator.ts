@@ -42,16 +42,45 @@ class TestValidator {
     const input = example.input;
     const expected = example.output;
     const startTime = performance.now();
-    const executionTime = performance.now() - startTime;
+
+    // 设置超时时间（例如 500毫秒）
+    const TIMEOUT_MS = 500;
     let result: any;
-    if (Array.isArray(input)) {
-      result = await this.solutionFn(input);
-    } else if (typeof input === "object") {
-      result = await this.solutionFn(...Object.values(input));
-    } else {
-      result = await this.solutionFn(input);
+    try {
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`执行超时`));
+        }, TIMEOUT_MS);
+      });
+
+      // 将同步函数包装成异步执行，避免阻塞事件循环
+      const executionPromise = new Promise((resolve, reject) => {
+        // 使用 setImmediate 确保同步代码不会阻塞事件循环
+        setImmediate(() => {
+          try {
+            let fnResult: any;
+            if (Array.isArray(input)) {
+              fnResult = this.solutionFn(input);
+            } else if (typeof input === "object") {
+              fnResult = this.solutionFn(...Object.values(input));
+            } else {
+              fnResult = this.solutionFn(input);
+            }
+            resolve(fnResult);
+          } catch (error) {
+            reject(error);
+          }
+        });
+      });
+
+      result = await Promise.race([executionPromise, timeoutPromise]);
+    } catch (error) {
+      console.error("[ error ] >", error);
+      process.exit(1);
     }
     const passed = this.compareResults(result, expected);
+    const executionTime = performance.now() - startTime;
+
     return {
       passed,
       failedTestCase: passed
