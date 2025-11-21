@@ -33,7 +33,7 @@ class ProblemGenerator {
         score: 0,
       };
     } catch (err: any) {
-      await this.fileGenerator.saveErrorLog(json);
+      await this.fileGenerator.saveErrorLog(problems);
       oraInstance.fail("题目生成失败: " + (err?.message || err));
       // 提示并返回空结果，也可根据需求抛出异常
       return {

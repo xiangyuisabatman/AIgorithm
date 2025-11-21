@@ -36,6 +36,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # projects
 problems/*
 solutions/*
+errors/*
 progress.json
 
 problems.json

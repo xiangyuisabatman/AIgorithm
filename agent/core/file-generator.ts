@@ -124,10 +124,15 @@ class FileGenerator {
       ".json";
     const filePath = path.join(errorsDir, fileName);
 
+    const json = {
+      content: jsonString,
+    };
+
     try {
-      fs.writeFileSync(filePath, jsonString, "utf-8");
+      fs.writeFileSync(filePath, JSON.stringify(json), "utf-8");
       GlobalConsole.success(`错误日志已保存: ${filePath}`);
     } catch (error) {
+      console.log(jsonString);
       GlobalConsole.error("写入错误日志失败: " + error);
     }
     return filePath;
