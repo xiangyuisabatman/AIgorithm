@@ -3,7 +3,7 @@ import { AiServer } from "./ai";
 import { FileGenerator } from "./file-generator";
 import { getGlobalOra } from "./global";
 import type { PracticeSession, UserProgress } from "./types";
-import { getProblemsJson } from "./utils";
+import { getCompletedProblemsFromProgress, getProblemsJson } from "./utils";
 
 class ProblemGenerator {
   private userProgress: UserProgress;
@@ -67,7 +67,24 @@ class ProblemGenerator {
         "]\n\n";
     }
 
-    const prompt = difficultyInfo + avoidRepeatPrompt + problem_template(num);
+    const completedList = await getCompletedProblemsFromProgress();
+
+    // 构造避免推荐已完成题目的前置信息
+    let dontRepeatCompletedList = "";
+    if (completedList && completedList.length > 0) {
+      dontRepeatCompletedList =
+        "请确保本次生成的题目不能与下列已完成题目重复：[" +
+        completedList.join(", ") +
+        "]\n\n";
+    }
+    // 将dontRepeatCompletedList插入到prompt顶部，优先于avoidRepeatPrompt
+    // 优先结合两个去重要求（已生成和已完成）
+
+    const prompt =
+      difficultyInfo +
+      avoidRepeatPrompt +
+      dontRepeatCompletedList +
+      problem_template(num);
     const aiRes = await this.ai.createCompletion(prompt);
 
     return aiRes.choices[0]?.message?.content || "";

@@ -141,3 +141,26 @@ export function clearProblemsJson() {
     GlobalConsole.error('清空 "problems.json" 内容失败: ' + err);
   }
 }
+
+/**
+ * 获取根目录 progress.json 文件中的 userProgress.completedProblems 字段
+ * @returns {string[]} 已完成题目的英文名数组
+ */
+export function getCompletedProblemsFromProgress(): string[] {
+  const fs = require("fs");
+  const path = require("path");
+  const progressJsonPath = path.join(process.cwd(), "progress.json");
+  if (!fs.existsSync(progressJsonPath)) {
+    // 没有进度文件，返回空数组
+    return [];
+  }
+  try {
+    const content = fs.readFileSync(progressJsonPath, "utf-8");
+    const json = JSON.parse(content);
+    return Array.isArray(json?.userProgress?.completedProblems)
+      ? json.userProgress.completedProblems
+      : [];
+  } catch (err) {
+    return [];
+  }
+}
